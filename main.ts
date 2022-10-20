@@ -1,26 +1,44 @@
-let HasHeardSomething = 0
-input.onButtonPressed(Button.A, function () {
-    music.setBuiltInSpeakerEnabled(true)
-})
-input.onButtonPressed(Button.AB, function () {
-	
-})
-input.onButtonPressed(Button.B, function () {
-    music.setBuiltInSpeakerEnabled(false)
-})
-function ClearScreen () {
-    basic.clearScreen()
+function CallWarden () {
+    radio.sendNumber(1)
+    NumberOfSoundsHeard = 0
+    basic.showLeds(`
+        # . . . #
+        . # . # .
+        . . # . .
+        . # . # .
+        # . . . #
+        `)
 }
+input.onButtonPressed(Button.A, function () {
+    CallWarden()
+})
+function LogSoundHeard () {
+    NumberOfSoundsHeard += 1
+    if (NumberOfSoundsHeard == 3) {
+        CallWarden()
+    } else {
+        basic.showNumber(NumberOfSoundsHeard)
+    }
+}
+input.onButtonPressed(Button.B, function () {
+    LogSoundHeard()
+})
+let NumberOfSoundsHeard = 0
+NumberOfSoundsHeard = 0
+let EnableCounting = true
+radio.setGroup(1)
 basic.forever(function () {
-    if (input.soundLevel() > 80 && HasHeardSomething < 2) {
-    	
-    } else if (input.soundLevel() > 30 && HasHeardSomething < 1) {
-    	
+    if (EnableCounting) {
+        if (input.soundLevel() > 80) {
+            EnableCounting = false
+            CallWarden()
+        } else if (input.soundLevel() > 30) {
+            EnableCounting = false
+            LogSoundHeard()
+        }
     }
 })
-loops.everyInterval(3000, function () {
-    if (input.soundLevel() < 10 && HasHeardSomething == 0) {
-        ClearScreen()
-    }
-    HasHeardSomething = 0
+loops.everyInterval(5000, function () {
+    EnableCounting = true
+    basic.clearScreen()
 })
